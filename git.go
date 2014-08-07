@@ -6,7 +6,7 @@
 
 * Creation Date : 08-07-2014
 
-* Last Modified : Thu 07 Aug 2014 08:44:13 PM UTC
+* Last Modified : Thu 07 Aug 2014 08:48:26 PM UTC
 
 * Created By : Kiyor
 
@@ -20,14 +20,14 @@ import (
 	"strings"
 )
 
-type GitRepo struct {
+type Git struct {
 	path   string
 	bin    string
 	prefix string
 }
 
-func NewGitRepo(path string, bin string) *GitRepo {
-	return &GitRepo{
+func NewGit(path string, bin string) *Git {
+	return &Git{
 		path:   path,
 		bin:    bin,
 		prefix: fmt.Sprintf("cd %s; %s", path, bin),
@@ -40,7 +40,7 @@ func osexec(cmd string) (stdOut string, stdErr error) {
 	return
 }
 
-func (git *GitRepo) Commit(comment string, files []string) error {
+func (git *Git) Commit(comment string, files []string) error {
 	var fs string
 	for _, v := range files {
 		fs += v + " "
@@ -50,13 +50,13 @@ func (git *GitRepo) Commit(comment string, files []string) error {
 	return err
 }
 
-func (git *GitRepo) Push() error {
+func (git *Git) Push() error {
 	cmd := fmt.Sprintf("%s push", git.prefix)
 	_, err := osexec(cmd)
 	return err
 }
 
-func (git *GitRepo) Add(files []string) error {
+func (git *Git) Add(files []string) error {
 	var fs string
 	for _, v := range files {
 		fs += v + " "
