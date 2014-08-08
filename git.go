@@ -6,7 +6,7 @@
 
 * Creation Date : 08-07-2014
 
-* Last Modified : Thu 07 Aug 2014 08:48:26 PM UTC
+* Last Modified : Fri 08 Aug 2014 06:25:32 PM UTC
 
 * Created By : Kiyor
 
@@ -15,20 +15,21 @@ _._._._._._._._._._._._._._._._._._._._._.*/
 package ezgit
 
 import (
+	"errors"
 	"fmt"
 	"os/exec"
 	"strings"
 )
 
 type Git struct {
-	path   string
+	Path   string
 	bin    string
 	prefix string
 }
 
 func NewGit(path string, bin string) *Git {
 	return &Git{
-		path:   path,
+		Path:   path,
 		bin:    bin,
 		prefix: fmt.Sprintf("cd %s; %s", path, bin),
 	}
@@ -37,6 +38,9 @@ func NewGit(path string, bin string) *Git {
 func osexec(cmd string) (stdOut string, stdErr error) {
 	out, stdErr := exec.Command("/bin/sh", "-c", cmd).Output()
 	stdOut = strings.TrimSpace(strings.Trim(string(out), "\n"))
+	if stdErr != nil {
+		stdErr = errors.New("[" + cmd + "]; " + stdErr.Error())
+	}
 	return
 }
 
@@ -63,5 +67,29 @@ func (git *Git) Add(files []string) error {
 	}
 	cmd := fmt.Sprintf("%s add %s", git.prefix, fs)
 	_, err := osexec(cmd)
+	return err
+}
+
+func (git *Git) Clone(remote string) error {
+	part := strings.Split(git.Path, "/")
+	var path string
+	for _, v := range part[:len(part)-1] {
+		if v != "" {
+			path += "/" + v
+		}
+	}
+	cmd := fmt.Sprintf("mkdir -p %s && cd %s && %s clone %s", path, path, git.bin, remote)
+	_, err := osexec(cmd)
+	return err
+}
+
+func (git *Git) PullFile(branch string, file string) error {
+	cmd := fmt.Sprintf("%s fetch", git.prefix)
+	_, err := osexec(cmd)
+	if err != nil {
+		return err
+	}
+	cmd = fmt.Sprintf("%s checkout %s -- %s", git.prefix, branch, file)
+	_, err = osexec(cmd)
 	return err
 }
