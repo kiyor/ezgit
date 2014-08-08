@@ -6,7 +6,7 @@
 
 * Creation Date : 08-07-2014
 
-* Last Modified : Fri 08 Aug 2014 06:25:32 PM UTC
+* Last Modified : Fri 08 Aug 2014 11:17:43 PM UTC
 
 * Created By : Kiyor
 
@@ -56,6 +56,12 @@ func (git *Git) Commit(comment string, files []string) error {
 
 func (git *Git) Push() error {
 	cmd := fmt.Sprintf("%s push", git.prefix)
+	_, err := osexec(cmd)
+	return err
+}
+
+func (git *Git) PushTo(remote string) error {
+	cmd := fmt.Sprintf("%s push %s", git.prefix, remote)
 	_, err := osexec(cmd)
 	return err
 }
