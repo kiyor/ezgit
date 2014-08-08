@@ -6,12 +6,13 @@
 
 * Creation Date : 08-07-2014
 
-* Last Modified : Fri 08 Aug 2014 11:17:43 PM UTC
+* Last Modified : Fri 08 Aug 2014 11:22:19 PM UTC
 
 * Created By : Kiyor
 
 _._._._._._._._._._._._._._._._._._._._._.*/
 
+// test package comment
 package ezgit
 
 import (
