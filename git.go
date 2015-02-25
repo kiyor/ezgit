@@ -6,7 +6,7 @@
 
 * Creation Date : 08-07-2014
 
-* Last Modified : Tue 16 Dec 2014 07:14:22 PM UTC
+* Last Modified : Wed 25 Feb 2015 01:49:27 AM UTC
 
 * Created By : Kiyor
 
@@ -18,6 +18,7 @@ package ezgit
 import (
 	"fmt"
 	"github.com/kiyor/golib"
+	// 	"log"
 	"strings"
 )
 
@@ -31,20 +32,34 @@ func NewGit(path string, bin string) *Git {
 	return &Git{
 		Path:   path,
 		bin:    bin,
-		prefix: fmt.Sprintf("cd %s; %s", path, bin),
+		prefix: fmt.Sprintf("cd %s;%s", path, bin),
 	}
 }
 
-func (git *Git) Commit(comment string, files []string) error {
-	var fs string
-	for _, v := range files {
-		fs += v + " "
-	}
+// func (git *Git) Commit(comment string, files []string) error {
+// 	var fs string
+// 	for _, v := range files {
+// 		fs += v + " "
+// 	}
+// 	cmd := fmt.Sprintf("%s commit -m '%s' %s", git.prefix, comment, fs)
+// 	_, err := golib.Osexec(cmd)
+// 	return err
+// }
+func (git *Git) Commit(comment string, file interface{}) error {
+	r := strings.NewReplacer("[", "", "]", "", ",", "")
+	fs := r.Replace(fmt.Sprintf("%v", file))
 	cmd := fmt.Sprintf("%s commit -m '%s' %s", git.prefix, comment, fs)
 	_, err := golib.Osexec(cmd)
 	return err
 }
 
+func (git *Git) CommitAll(comment string) error {
+	cmd := fmt.Sprintf("%s commit -a -m '%s'", git.prefix, comment)
+	_, err := golib.Osexec(cmd)
+	return err
+}
+
+//normally output is not error, it's just std err output
 func (git *Git) Push() error {
 	cmd := fmt.Sprintf("%s push", git.prefix)
 	_, err := golib.Osexec(cmd)
@@ -57,11 +72,18 @@ func (git *Git) PushTo(remote string) error {
 	return err
 }
 
-func (git *Git) Add(files []string) error {
-	var fs string
-	for _, v := range files {
-		fs += v + " "
-	}
+// func (git *Git) Add(files []string) error {
+// 	var fs string
+// 	for _, v := range files {
+// 		fs += v + " "
+// 	}
+// 	cmd := fmt.Sprintf("%s add %s", git.prefix, fs)
+// 	_, err := golib.Osexec(cmd)
+// 	return err
+// }
+func (git *Git) Add(file interface{}) error {
+	r := strings.NewReplacer("[", "", "]", "", ",", "")
+	fs := r.Replace(fmt.Sprintf("%v", file))
 	cmd := fmt.Sprintf("%s add %s", git.prefix, fs)
 	_, err := golib.Osexec(cmd)
 	return err
