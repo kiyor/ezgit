@@ -45,6 +45,19 @@ func NewGit(path string, bin string) *Git {
 // 	_, err := golib.Osexec(cmd)
 // 	return err
 // }
+
+func (git *Git) Init() error {
+	cmd := fmt.Sprintf("%s init", git.prefix)
+	_, err := golib.Osexec(cmd)
+	return err
+}
+
+func (git *Git) AddRemote(name string, location string) error {
+	cmd := fmt.Sprintf("%s remote add %s %s", git.prefix, name, location)
+	_, err := golib.Osexec(cmd)
+	return err
+}
+
 func (git *Git) Commit(comment string, file interface{}) error {
 	r := strings.NewReplacer("[", "", "]", "", ",", "")
 	fs := r.Replace(fmt.Sprintf("%v", file))
