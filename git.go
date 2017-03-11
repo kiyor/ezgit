@@ -6,7 +6,7 @@
 
 * Creation Date : 08-07-2014
 
-* Last Modified : Wed 25 Feb 2015 01:49:27 AM UTC
+* Last Modified : Thu 06 Oct 2016 06:36:23 AM UTC
 
 * Created By : Kiyor
 
@@ -81,6 +81,21 @@ func (git *Git) Push() error {
 
 func (git *Git) PushTo(remote string) error {
 	cmd := fmt.Sprintf("%s push %s", git.prefix, remote)
+	_, err := golib.Osexec(cmd)
+	return err
+}
+
+func (git *Git) Remote(args string) ([]string, error) {
+	cmd := fmt.Sprintf("%s remote %s", git.prefix, args)
+	out, err := golib.Osexec(cmd)
+	if err != nil {
+		return []string{}, err
+	}
+	return strings.Split(out, "\n"), nil
+}
+
+func (git *Git) PushAll() error {
+	cmd := fmt.Sprintf("for remote in `%s remote`; do %s push $remote; done", git.prefix, git.prefix)
 	_, err := golib.Osexec(cmd)
 	return err
 }
