@@ -6,7 +6,7 @@
 
 * Creation Date : 08-07-2014
 
-* Last Modified : Thu 06 Oct 2016 06:36:23 AM UTC
+* Last Modified : Mon 24 Apr 2017 06:46:44 PM UTC
 
 * Created By : Kiyor
 
@@ -18,14 +18,15 @@ package ezgit
 import (
 	"fmt"
 	"github.com/kiyor/golib"
-	// 	"log"
 	"strings"
+	"sync"
 )
 
 type Git struct {
 	Path   string
 	bin    string
 	prefix string
+	mu     *sync.Mutex
 }
 
 func NewGit(path string, bin string) *Git {
@@ -33,18 +34,9 @@ func NewGit(path string, bin string) *Git {
 		Path:   path,
 		bin:    bin,
 		prefix: fmt.Sprintf("cd %s;%s", path, bin),
+		mu:     new(sync.Mutex),
 	}
 }
-
-// func (git *Git) Commit(comment string, files []string) error {
-// 	var fs string
-// 	for _, v := range files {
-// 		fs += v + " "
-// 	}
-// 	cmd := fmt.Sprintf("%s commit -m '%s' %s", git.prefix, comment, fs)
-// 	_, err := golib.Osexec(cmd)
-// 	return err
-// }
 
 func (git *Git) Init() error {
 	cmd := fmt.Sprintf("%s init", git.prefix)
@@ -53,12 +45,16 @@ func (git *Git) Init() error {
 }
 
 func (git *Git) AddRemote(name string, location string) error {
+	git.mu.Lock()
+	defer git.mu.Unlock()
 	cmd := fmt.Sprintf("%s remote add %s %s", git.prefix, name, location)
 	_, err := golib.Osexec(cmd)
 	return err
 }
 
 func (git *Git) Commit(comment string, file interface{}) error {
+	git.mu.Lock()
+	defer git.mu.Unlock()
 	r := strings.NewReplacer("[", "", "]", "", ",", "")
 	fs := r.Replace(fmt.Sprintf("%v", file))
 	cmd := fmt.Sprintf("%s commit -m '%s' %s", git.prefix, comment, fs)
@@ -67,6 +63,8 @@ func (git *Git) Commit(comment string, file interface{}) error {
 }
 
 func (git *Git) CommitAll(comment string) error {
+	git.mu.Lock()
+	defer git.mu.Unlock()
 	cmd := fmt.Sprintf("%s commit -a -m '%s'", git.prefix, comment)
 	_, err := golib.Osexec(cmd)
 	return err
@@ -74,12 +72,16 @@ func (git *Git) CommitAll(comment string) error {
 
 //normally output is not error, it's just std err output
 func (git *Git) Push() error {
+	git.mu.Lock()
+	defer git.mu.Unlock()
 	cmd := fmt.Sprintf("%s push", git.prefix)
 	_, err := golib.Osexec(cmd)
 	return err
 }
 
 func (git *Git) PushTo(remote string) error {
+	git.mu.Lock()
+	defer git.mu.Unlock()
 	cmd := fmt.Sprintf("%s push %s", git.prefix, remote)
 	_, err := golib.Osexec(cmd)
 	return err
@@ -95,21 +97,16 @@ func (git *Git) Remote(args string) ([]string, error) {
 }
 
 func (git *Git) PushAll() error {
+	git.mu.Lock()
+	defer git.mu.Unlock()
 	cmd := fmt.Sprintf("for remote in `%s remote`; do %s push $remote; done", git.prefix, git.prefix)
 	_, err := golib.Osexec(cmd)
 	return err
 }
 
-// func (git *Git) Add(files []string) error {
-// 	var fs string
-// 	for _, v := range files {
-// 		fs += v + " "
-// 	}
-// 	cmd := fmt.Sprintf("%s add %s", git.prefix, fs)
-// 	_, err := golib.Osexec(cmd)
-// 	return err
-// }
 func (git *Git) Add(file interface{}) error {
+	git.mu.Lock()
+	defer git.mu.Unlock()
 	r := strings.NewReplacer("[", "", "]", "", ",", "")
 	fs := r.Replace(fmt.Sprintf("%v", file))
 	cmd := fmt.Sprintf("%s add %s", git.prefix, fs)
@@ -131,6 +128,8 @@ func (git *Git) Clone(remote string) error {
 }
 
 func (git *Git) PullFile(branch string, file string) error {
+	git.mu.Lock()
+	defer git.mu.Unlock()
 	cmd := fmt.Sprintf("%s fetch", git.prefix)
 	_, err := golib.Osexec(cmd)
 	if err != nil {
