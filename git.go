@@ -6,7 +6,7 @@
 
 * Creation Date : 08-07-2014
 
-* Last Modified : Mon 24 Apr 2017 06:46:44 PM UTC
+* Last Modified : Wed 26 Apr 2017 02:12:53 AM UTC
 
 * Created By : Kiyor
 
@@ -52,20 +52,28 @@ func (git *Git) AddRemote(name string, location string) error {
 	return err
 }
 
-func (git *Git) Commit(comment string, file interface{}) error {
+func (git *Git) Commit(comment string, file interface{}, options ...string) error {
 	git.mu.Lock()
 	defer git.mu.Unlock()
 	r := strings.NewReplacer("[", "", "]", "", ",", "")
 	fs := r.Replace(fmt.Sprintf("%v", file))
-	cmd := fmt.Sprintf("%s commit -m '%s' %s", git.prefix, comment, fs)
+	cmd := fmt.Sprintf("%s commit ", git.prefix)
+	for _, option := range options {
+		cmd += option + " "
+	}
+	cmd += fmt.Sprintf("-m '%s' %s", comment, fs)
 	_, err := golib.Osexec(cmd)
 	return err
 }
 
-func (git *Git) CommitAll(comment string) error {
+func (git *Git) CommitAll(comment string, options ...string) error {
 	git.mu.Lock()
 	defer git.mu.Unlock()
-	cmd := fmt.Sprintf("%s commit -a -m '%s'", git.prefix, comment)
+	cmd := fmt.Sprintf("%s commit -a ", git.prefix)
+	for _, option := range options {
+		cmd += option + " "
+	}
+	cmd += fmt.Sprintf("-m '%s'", comment)
 	_, err := golib.Osexec(cmd)
 	return err
 }
